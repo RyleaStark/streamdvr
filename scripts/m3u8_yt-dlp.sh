@@ -12,7 +12,7 @@ if [ ! -z "$proxyserver" ]; then
     proxyserver="--proxy $proxyserver"
 fi
 
-yt-dlp -g $site $proxyserver $extraargs > $tmp/stdout 2> $tmp/stderr
+yt-dlp --no-warnings -g $site $proxyserver $extraargs > $tmp/stdout 2> $tmp/stderr
 
 if [ "$?" -eq 0 ]; then
     # Streamer is online
@@ -20,12 +20,12 @@ if [ "$?" -eq 0 ]; then
     exit 0
 else
     # good exit code for offline cases
-    grep -i "offline" $tmp/stdout > /dev/null 2> /dev/null
+    grep -i "not currently live" $tmp/stdout > /dev/null 2> /dev/null
     if [ "$?" -eq 0 ]; then
         exit 0
     fi
 
-    grep -i "offline" $tmp/stderr > /dev/null 2> /dev/null
+    grep -i "not currently live" $tmp/stderr > /dev/null 2> /dev/null
     if [ "$?" -eq 0 ]; then
         exit 0
     fi
