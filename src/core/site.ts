@@ -442,7 +442,7 @@ export abstract class Site {
             this.redrawList = true;
         }
 
-        if (streamer.postProcess === false && streamer.capture !== undefined && !options.isStreaming) {
+        if (streamer.postProcess === false && streamer.capture !== undefined && streamer.capture.pid !== undefined && !options.isStreaming) {
             // This issue entirely depends on whether the youtube-dl and/or
             // streamlink process robustly ends when a broadcast stops
             // (normally or through some error case like internet disconnection).
