@@ -5,6 +5,7 @@ import * as yaml from "js-yaml";
 import {spawn, ChildProcessWithoutNullStreams} from "child_process";
 import {Dvr, MSG} from "./dvr";
 import {Tui} from "./tui";
+import { Stats } from "fs";
 
 const colors = require("colors");
 const fs = require("fs");
@@ -138,10 +139,22 @@ export abstract class Site {
         return filename;
     }
 
+    protected async dirSize(directory: string): Promise<number> {
+        const files: Array<any> = await fsp.readdir(directory);
+        const stats: Array<number> = await Promise.all(files.map(async (file) => {
+            const stat: Stats = await fsp.stat(path.join(directory, file));
+            return stat.size;
+        }));
+      
+        return stats.reduce((accumulator: number, size: number) => {
+            return accumulator + size
+        }, 0);
+    }
+
     protected async checkFileSize(streamer: Streamer, file: string) {
         const maxSize: number = this.dvr.config.recording.maxSize;
         const stat: any = await fsp.stat(file);
-        const sizeMB: number  = Math.round(stat.size / 1048576);
+        const sizeMB: number  = stat.isDirectory() ? Math.round(await this.dirSize(file) / 1048576) : Math.round(stat.size / 1048576);
 
         this.print(MSG.DEBUG, `${colors.file(streamer.filename)}, size=${sizeMB.toString()}MB, maxSize=${maxSize.toString()}MB`);
         if (sizeMB === streamer.filesize) {
@@ -208,7 +221,7 @@ export abstract class Site {
     protected getCaptureArguments(url: string, filename: string, params?: Array<string>): Array<string> {
         let args: Array<string> = [
             "-o",
-            path.join(this.dvr.config.recording.captureDirectory, `${filename}.ts`),
+            path.join(this.dvr.config.recording.captureDirectory, this.dvr.config.recording.autoConvertType === "m3u8" ? filename : `${filename}.ts`),
             "-s",
             url,
         ];
@@ -432,11 +445,6 @@ export abstract class Site {
             return;
         }
 
-        if (this.dvr.tryingToExit) {
-            this.print(MSG.DEBUG, `${colors.name(streamer.nm)} skipping lookup due to shutdown request`);
-            return;
-        }
-
         if (streamer.state !== options.prevState) {
             this.print(MSG.INFO, options.msg);
             this.redrawList = true;
@@ -600,7 +608,7 @@ export abstract class Site {
         }
 
         if (capture.pid) {
-            const filename: string = `${capInfo.filename}.ts`;
+            const filename: string = this.dvr.config.recording.autoConvertType === "m3u8" ? capInfo.filename : `${capInfo.filename}.ts`;
             this.print(MSG.INFO, `${colors.name(streamer.nm)} recording started: ${colors.file(filename)}`);
             this.storeCapInfo(streamer, filename, capture, false);
         } else {
@@ -615,7 +623,7 @@ export abstract class Site {
     }
 
     protected async endCapture(streamer: Streamer, capInfo: CapInfo) {
-        const fullname: string = `${capInfo.filename}.ts`;
+        const fullname: string = this.dvr.config.recording.autoConvertType === "m3u8" ? capInfo.filename : `${capInfo.filename}.ts`;
         try {
             const stats: any = await fsp.stat(path.join(this.dvr.config.recording.captureDirectory, fullname));
             if (stats) {
@@ -636,7 +644,7 @@ export abstract class Site {
             }
         } catch (err: any) {
             if (err.code === "ENOENT") {
-                this.print(MSG.ERROR, `${colors.name(streamer.nm)}, ${colors.file(capInfo.filename + ".ts")} not found ` +
+                this.print(MSG.ERROR, `${colors.name(streamer.nm)}, ${colors.file(this.dvr.config.recording.autoConvertType === "m3u8" ? capInfo.filename : `${capInfo.filename}.ts`)} not found ` +
                     `in capturing directory, cannot convert to ${this.dvr.config.recording.autoConvertType}`);
             } else {
                 this.print(MSG.ERROR, `${colors.name(streamer.nm)}: ${err.toString()}`);

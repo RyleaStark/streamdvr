@@ -97,7 +97,7 @@ If you would like StreamDVR to support a new program and have written your own w
           Suppresses standard out messages
     * `recording`
         * `autoConvertType`
-          mp4, mkv, ts (no conversion)
+          mp4, mkv, ts (no conversion), m3u8 (no conversion)
         * `captureDirectory`
           Temporary storage area while recording
         * `completeDirectory`
