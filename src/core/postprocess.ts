@@ -7,6 +7,7 @@ import {Site, Streamer, CapInfo} from "./site";
 
 const colors = require("colors");
 const fsp = require("fs/promises");
+const fse = require("fs-extra")
 
 export class PostProcess {
 
@@ -146,7 +147,7 @@ export class PostProcess {
     protected async mv(oldPath: string, newPath: string) {
 
         try {
-            await fsp.rename(oldPath, newPath);
+            await fse.move(oldPath, newPath);
         } catch (err: any) {
             if (err) {
                 if (err.code === "EXDEV") {
