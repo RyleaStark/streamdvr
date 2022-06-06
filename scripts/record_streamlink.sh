@@ -12,7 +12,7 @@ if [ ! -z "$proxyserver" ]; then
     proxyserver="-https-proxy $proxyserver"
 fi
 
-streamlink --stream-sorting-excludes live -o "$output" $proxyserver $username $password $extraargs $debugargs "$site" best,best-unfiltered &
+streamlink $auth --stream-sorting-excludes live -o "$output" $proxyserver $username $password $extraargs $debugargs "$site" best,best-unfiltered &
 record_pid=$!
 
 killarg="" # Note: Streamlink does not respond to SIGINT
