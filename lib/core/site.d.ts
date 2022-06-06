@@ -35,6 +35,7 @@ export interface SiteConfig {
     m3u8fetch_args: string;
     recorder: string;
     recorder_args: string;
+    recorder_auth: string;
     username: string;
     password: string;
     scanInterval: number;
