@@ -46,6 +46,7 @@ export interface SiteConfig {
     m3u8fetch_args: string;
     recorder:       string;
     recorder_args:  string;
+    recorder_auth:  string;
     username:       string;
     password:       string;
     scanInterval:   number;
@@ -232,6 +233,10 @@ export abstract class Site {
 
         if (this.config.recorder_args) {
             args = args.concat(this.config.recorder_args);
+        }
+        
+        if (this.config.recorder_auth) {
+            args = args.concat(this.config.recorder_auth);
         }
 
         if (params) {
