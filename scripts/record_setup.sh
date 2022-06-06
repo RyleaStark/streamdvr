@@ -1,6 +1,7 @@
 #!/bin/bash
 
 debug=0
+auth=""
 extraargs=""
 username=""
 password=""
@@ -29,6 +30,10 @@ while (( "$#" )); do
             ;;
         -P|--proxy)
             proxyserver=$2
+            shift 2
+            ;;
+        -A|--auth)
+            auth=$2
             shift 2
             ;;
         --) # end argument parsing
