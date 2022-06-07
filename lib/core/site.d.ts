@@ -76,6 +76,7 @@ export declare abstract class Site {
     protected sleep(time: number): Promise<number>;
     getStreamerList(): Array<Streamer>;
     protected getFileName(nm: string): string;
+    protected dirSize(directory: string): Promise<number>;
     protected checkFileSize(streamer: Streamer, file: string): Promise<boolean>;
     protected processStreamers(): Promise<boolean>;
     start(): void;

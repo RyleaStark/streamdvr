@@ -7,6 +7,7 @@ import {Site, Streamer, CapInfo} from "./site";
 
 const colors = require("colors");
 const fsp = require("fs/promises");
+const fse = require("fs-extra")
 
 export class PostProcess {
 
@@ -35,11 +36,11 @@ export class PostProcess {
         const namePrint: string              = streamer ? `${colors.name(streamer.nm)}` : "";
         const fileType: string               = this.config.recording.autoConvertType;
         const completeDir: string            = await this.getCompleteDir(site, streamer);
-        const completeFile: string           = await this.uniqueFileName(completeDir, capInfo.filename, fileType) + "." + fileType;
-        const capPath: string                = path.join(this.config.recording.captureDirectory, capInfo.filename + ".ts");
+        const completeFile: string           = await this.uniqueFileName(completeDir, capInfo.filename, fileType) + (fileType === "m3u8" ? "" : "." + fileType);
+        const capPath: string                = path.join(this.config.recording.captureDirectory, fileType === "m3u8" ? capInfo.filename : capInfo.filename + ".ts");
         const cmpPath: string                = path.join(completeDir, completeFile);
 
-        if (fileType === "ts") {
+        if (fileType === "ts" || fileType === "m3u8") {
             this.dvr.print(MSG.DEBUG, `${namePrint} moving ${capPath} to ${cmpPath}`);
             await this.mv(capPath, cmpPath);
             await this.postScript(site, streamer, completeDir, completeFile);
@@ -146,7 +147,7 @@ export class PostProcess {
     protected async mv(oldPath: string, newPath: string) {
 
         try {
-            await fsp.rename(oldPath, newPath);
+            await fse.move(oldPath, newPath);
         } catch (err: any) {
             if (err) {
                 if (err.code === "EXDEV") {

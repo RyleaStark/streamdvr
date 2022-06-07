@@ -104,6 +104,10 @@ class Basic extends Site {
 
     protected async checkStreamerState(streamer: Streamer) {
         // Detect if streamer is online or actively streaming
+        if (this.dvr.tryingToExit) {
+            this.print(MSG.DEBUG, `${colors.name(streamer.nm)} skipping lookup due to shutdown request`);
+            return;
+        }
         const stream = await this.m3u8Script(streamer.uid, streamer.nm);
         const options: StreamerStateOptions = {
             msg: "",
