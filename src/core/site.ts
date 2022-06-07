@@ -244,12 +244,12 @@ export abstract class Site {
             args.push(`--${this.listName}-password=${this.config.password}`);
         }
 
-        if (this.config.recorder_args) {
-            args = args.concat(this.config.recorder_args);
-        }
-        
         if (this.config.recorder_auth) {
             args = args.concat(this.config.recorder_auth);
+        }
+
+        if (this.config.recorder_args) {
+            args = args.concat(this.config.recorder_args);
         }
 
         if (params) {

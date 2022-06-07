@@ -6,8 +6,8 @@ import {Dvr, Config, MSG} from "./dvr";
 import {Site, Streamer, CapInfo} from "./site";
 
 const colors = require("colors");
-const fsp = require("fs/promises");
-const fse = require("fs-extra")
+const fsp = require('fs').promises;
+const fse = require("fs-extra");
 
 export class PostProcess {
 

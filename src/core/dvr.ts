@@ -10,7 +10,7 @@ import {Site, CapInfo, UpdateCmd} from "./site";
 import {Tui} from "./tui";
 
 const colors = require("colors");
-const fsp = require("fs/promises");
+const fsp = require('fs').promises;
 
 export enum MSG {
     INFO  = 0,
