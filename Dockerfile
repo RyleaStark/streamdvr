@@ -6,6 +6,7 @@ ARG HEALTHCHECKS_ID
 ENV STREAMDVR_VERSION=master \
     YOUTUBEDL_VERSION=2021.06.06 \
     STREAMLINK_VERSION=5.1.2 \
+    S5CMD_VERSION=2.0.0 \
     YT_DLP_VERSION=2021.09.02 \
     HOME="/app/.home"
 
@@ -36,6 +37,9 @@ RUN \
   wget -qO- https://github.com/RyleaStark/StreamDVR/archive/refs/heads/${STREAMDVR_VERSION}.tar.gz | tar -xvz -C /tmp && \
   mv /tmp/StreamDVR-${STREAMDVR_VERSION}/* /app/ && cd /app && \ 
 	npm ci --only=production && \
+ echo "**** install s5cmd ****" && \
+  wget -qO- https://github.com/peak/s5cmd/releases/download/v${S5CMD_VERSION}/s5cmd_${S5CMD_VERSION}_Linux-64bit.tar.gz | tar -xvz -C /tmp && \
+  mv /tmp/s5cmd /app/ && cd /app && \ 
  echo "**** cleaning up ****" && \
 	npm cache clean --force && \
   apk del git build-base && \
