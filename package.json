@@ -20,6 +20,8 @@
     },
     "homepage": "https://github.com/jrudess/streamdvr",
     "dependencies": {
+        "@aws-sdk/client-s3": "^3.245.0",
+        "@aws-sdk/lib-storage": "^3.245.0",
         "@types/js-yaml": "^4.0.5",
         "@types/node": "^17.0.38",
         "await-spawn": "^4.0.2",
