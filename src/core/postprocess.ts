@@ -4,10 +4,23 @@ import * as path from "path";
 import {spawn, ChildProcessWithoutNullStreams} from "child_process";
 import {Dvr, Config, MSG} from "./dvr";
 import {Site, Streamer, CapInfo} from "./site";
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { env } from "process";
+import * as fs from "fs";
+import { Upload } from "@aws-sdk/lib-storage";
 
 const colors = require("colors");
 const fsp = require('fs').promises;
 const fse = require("fs-extra");
+
+const R2 = new S3Client({
+    region: "auto",
+    endpoint: `https://${env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+    credentials: {
+        accessKeyId: env.R2_ACCESS_KEY_ID!,
+        secretAccessKey: env.R2_SECRET_ACCESS_KEY!,
+    }
+});
 
 export class PostProcess {
 
@@ -70,6 +83,34 @@ export class PostProcess {
                 }
 
                 this.dvr.print(MSG.INFO, `${namePrint} done converting ${colors.file(completeFile)}`, site);
+
+                const searchDir = path.dirname(cmpPath);
+                const entries = await fs.promises.readdir(searchDir);
+                const cmpPathBase = path.basename(cmpPath);
+                const cmpPathBaseNoExt = cmpPathBase.substring(0, cmpPathBase.lastIndexOf("."));
+                this.dvr.print(MSG.DEBUG, `${namePrint} ${searchDir} ${cmpPathBase} ${cmpPathBaseNoExt}`, site);
+                for (const ent of entries) {
+                    if (ent.startsWith(cmpPathBaseNoExt)) {
+                        try {
+                            const upload = new Upload({
+                                client: R2,
+                                params: {
+                                    Bucket: env.R2_BUCKET_NAME!,
+                                    Key: `${streamer?.nm ?? "UNKNOWN"}/${ent}`,
+                                    Body: fs.createReadStream(path.resolve(searchDir, ent)),
+                                },
+                            });
+                            upload.on("httpUploadProgress", (progress) => {
+                                this.dvr.print(MSG.INFO, `${namePrint} Uploading ${ent} (${progress})`, site);
+                            });
+                            await upload.done();
+                            this.dvr.print(MSG.INFO, `${namePrint} Uploaded ${ent}`, site);
+                        } catch (error) {
+                            this.dvr.print(MSG.ERROR, `${namePrint} Failed to upload ${ent}: ${error}`, site);
+                        }
+                    }
+                }
+
                 await this.postScript(site, streamer, completeDir, completeFile);
             });
         });
